@@ -1,0 +1,25 @@
+<form id="<%= formId %>" class="max-w-4xl mx-auto my-8 p-4 border-2 border-gray-500 flex flex-col md:flex-row gap-2 justify-stretch items-end">
+    <div class="flex-1 w-full">
+        <label class="block mb-1 text-xs uppercase" for="name">Product name</label>
+        <input class="bg-slate-800 border border-gray-500 text-gray-100 w-full"
+            type="text" name="name" id="name" required>
+    </div>
+    <div class="flex-1 w-full">
+        <label class="block mb-1 text-xs uppercase" for="categories">Categories</label>
+        <input class="bg-slate-800 border border-gray-500 text-gray-100 w-full"
+            type="text" name="categories" id="categories" required>
+    </div>
+    <div class="flex-1 w-full">
+        <label class="block mb-1 text-xs uppercase" for="price">Price ($)</label>
+        <input class="bg-slate-800 border border-gray-500 text-gray-100 placeholder-gray-500 w-full text-right"
+            type="number" placeholder="0.00" min="0" step="0.01" name="price" id="price" required>
+    </div>
+    <div class="flex-1 w-full">
+        <label class="block mb-1 text-xs uppercase" for="stock">Stock</label>
+        <input class="bg-slate-800 border border-gray-500 text-gray-100 placeholder-gray-500 w-full text-right"
+            type="number" placeholder="0" min="0" name="stock" id="stock" required>
+    </div>
+    <div class="w-full md:w-fit">
+        <button class="text-sm bg-slate-700 px-3 mt-2 py-1 rounded-md w-full"><%= button %></button>
+    </div>
+</form>

@@ -1,0 +1,55 @@
+<%- include("partials/header") %>
+
+<main class="mx-4">
+    <h2 class="text-2xl font-semibold max-w-4xl mx-auto px-4">
+        Edit product
+    </h2>
+    <%- include("partials/product-form", { formId: "edit-form", button: "Edit" }) %>
+</main>
+<script>
+    const form = document.getElementById("edit-form");
+
+    form.querySelectorAll("input").forEach(input => input.disabled = true);
+
+    fetch("/api/products/<%= id %>")
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("error fetching product");
+            }
+            return res.json();
+        })
+        .then(product => {
+            form.name.value = product.name;
+            form.categories.value = product.categories.join(", ");
+            form.price.value = product.price;
+            form.stock.value = product.stock;
+            form.querySelectorAll("input").forEach(input => input.disabled = false);
+        })
+        .catch(err => console.error(err));
+
+    form.addEventListener("submit", async e => {
+        e.preventDefault();
+
+        try {
+            const res = await fetch("/api/products/<%= id %>", {
+                headers: { "Content-Type": "application/json" },
+                method: "PUT",
+                body: JSON.stringify({
+                    name: form.name.value,
+                    categories: form.categories.value,
+                    price: form.price.valueAsNumber,
+                    stock: form.stock.valueAsNumber,
+                }),
+            });
+            if (!res.ok) {
+                throw new Error("error submitting form");
+            }
+            window.location.assign("/");
+        }
+        catch (err) {
+            console.error(err);
+        }
+    });
+</script>
+
+<%- include("partials/footer") %>

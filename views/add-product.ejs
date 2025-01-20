@@ -1,0 +1,38 @@
+<%- include("partials/header") %>
+
+<main class="mx-4">
+    <h2 class="text-2xl font-semibold max-w-4xl mx-auto px-4">
+        Add new product
+    </h2>
+    <%- include("partials/product-form", { formId: "add-form", button: "Add" }) %>
+</main>
+
+<script>
+    const form = document.getElementById("add-form");
+
+    form.addEventListener("submit", async e => {
+        e.preventDefault();
+
+        try {
+            const res = await fetch("/api/products", {
+                headers: { "Content-Type": "application/json" },
+                method: "POST",
+                body: JSON.stringify({
+                    name: form.name.value,
+                    categories: form.categories.value,
+                    price: form.price.valueAsNumber,
+                    stock: form.stock.valueAsNumber,
+                }),
+            });
+            if (!res.ok) {
+                throw new Error("error submitting form");
+            }
+            window.location.assign("/");
+        }
+        catch (err) {
+            console.error(err);
+        }
+    });
+</script>
+
+<%- include("partials/footer") %>

@@ -1,0 +1,101 @@
+<%- include("partials/header") %>
+
+<main class="mx-4">
+    <h2 class="text-2xl font-semibold max-w-4xl mx-auto px-4">
+        <% if (category) { %>
+            <span class="text-sm tracking-wider font-light text-gray-400">Category /</span>
+            <%= category %>
+        <% } else { %>
+            All products
+        <% } %>
+    </h2>
+    <p id="no-products" class="hidden text-center text-gray-500 my-8">No products found</p>
+    <div id="product-grid" data-category="<%= category %>" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl mx-auto my-8"></div>
+</main>
+
+<script>
+    const productGrid = document.getElementById("product-grid");
+    const noProducts = document.getElementById("no-products");
+    let productsState = [];
+
+    async function loadProducts() {
+        const query = productGrid.dataset.category ?
+            `?category=${productGrid.dataset.category}` : "";
+
+        const res = await fetch(`/api/products${query}`);
+        if (!res.ok) {
+            throw new Error("error fetching products");
+        }
+        return res.json();
+    }
+
+    function renderProducts(products) {
+        productGrid.innerHTML = "";
+
+        if (products.length === 0) {
+            noProducts.classList.remove("hidden");
+        }
+        else {
+            noProducts.classList.add("hidden");
+        }
+
+        for (const product of products) {
+            productGrid.appendChild(renderProduct(product));
+        }
+    }
+
+    function renderProduct(product) {
+        const div = document.createElement("div");
+        div.className = "flex flex-col border-2 border-gray-500 p-4";
+        div.innerHTML = `
+            <img class="invert" src="/360x240.svg" alt="${product.name}">
+            <h2 class="text-center text-xl font-semibold my-2">${product.name}</h2>
+            <div class="flex flex-wrap gap-2 justify-center mb-6">
+                ${product.categories.map(category => {
+                    return `<a class="text-xs bg-slate-700 px-2 py-1 rounded-md hover:bg-slate-800 transition-colors" href="/category/${category}">${category}</a>`
+                }).join("")}
+            </div>
+            <div class="flex items-end mt-auto">
+                <div>
+                    <p class="text-lg font-semibold">$${product.price.toFixed(2)}</p>
+                    <p class="text-gray-500 font-semibold">Stock: ${product.stock}</p>
+                </div>
+                <div class="ml-auto">
+                    <a href="/edit/${product._id}" class="edit inline-block text-gray-500 hover:text-green-400 transition-colors" >
+                        <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg"><path d="M880 836H144c-17.7 0-32 14.3-32 32v36c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-36c0-17.7-14.3-32-32-32zm-622.3-84c2 0 4-.2 6-.5L431.9 722c2-.4 3.9-1.3 5.3-2.8l423.9-423.9a9.96 9.96 0 0 0 0-14.1L694.9 114.9c-1.9-1.9-4.4-2.9-7.1-2.9s-5.2 1-7.1 2.9L256.8 538.8c-1.5 1.5-2.4 3.3-2.8 5.3l-29.5 168.2a33.5 33.5 0 0 0 9.4 29.8c6.6 6.4 14.9 9.9 23.8 9.9z"></path></svg>
+                    </a>
+                    <button class="delete ml-1 text-gray-500 hover:text-red-400 transition-colors cursor-pointer">
+                        <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16" height="1.5em" width="1.5em" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M2.5 1a1 1 0 00-1 1v1a1 1 0 001 1H3v9a2 2 0 002 2h6a2 2 0 002-2V4h.5a1 1 0 001-1V2a1 1 0 00-1-1H10a1 1 0 00-1-1H7a1 1 0 00-1 1H2.5zm3 4a.5.5 0 01.5.5v7a.5.5 0 01-1 0v-7a.5.5 0 01.5-.5zM8 5a.5.5 0 01.5.5v7a.5.5 0 01-1 0v-7A.5.5 0 018 5zm3 .5a.5.5 0 00-1 0v7a.5.5 0 001 0v-7z" clip-rule="evenodd"></path></svg>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        div.querySelector(".delete").addEventListener("click", () => deleteProduct(product._id));
+
+        return div;
+    }
+
+    async function deleteProduct(id) {
+        try {
+            const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+            if (!res.ok) {
+                throw new Error("error deleting product");
+            }
+            productsState = productsState.filter(product => product._id !== id);
+            renderProducts(productsState);
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
+
+    loadProducts()
+        .then(products => {
+            productsState = products;
+            renderProducts(productsState);
+        })
+        .catch(console.error);
+</script>
+
+<%- include("partials/footer") %>
