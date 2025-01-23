@@ -1,20 +1,27 @@
+import "dotenv/config";
 import express from "express";
 import mongoose from "mongoose";
 import router from "./routes/apiRoutes";
+
+if (!process.env.URI) {
+    console.error("URI must be set in .env");
+    process.exit(1);
+}
+if (!process.env.PORT) {
+    console.error("PORT must be set in .env");
+    process.exit(1);
+}
 
 const app = express();
 app.use(express.static("public"));
 app.use(express.json());
 app.set("view engine", "ejs");
 
-const dbUri = "mongodb://127.0.0.1:27017/store";
-const port = 3000;
-
-mongoose.connect(dbUri)
+mongoose.connect(process.env.URI)
     .then(() => {
-        console.log("connected to", dbUri);
-        app.listen(port, () => {
-            console.log(`listening on http://localhost:${port}`);
+        console.log("connected to", process.env.URI);
+        app.listen(process.env.PORT, () => {
+            console.log(`listening on http://localhost:${process.env.PORT}`);
         });
     })
     .catch(err => console.error("error connecting to db:", err));
